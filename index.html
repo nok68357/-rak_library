@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>บันทึกการเข้าใช้ห้องสมุด</title>
+  
+  <!-- Google Fonts: Prompt -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+      background-color: #f0f4f8;
+      color: #333;
+    }
+    .main-container {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 15px;
+    }
+    .card-custom {
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(149, 157, 165, 0.15);
+      background: #fff;
+    }
+    
+    .logo-img {
+      max-width: 180px;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+      height: auto;
+    }
+    @media (min-width: 576px) {
+        .logo-img { max-width: 250px; }
+    }
+    
+    .input-studentid, .input-cardid {
+      font-size: 2rem;
+      text-align: center;
+      letter-spacing: 2px;
+      border-radius: 12px;
+      font-weight: 600;
+      color: #0d6efd;
+      border: 2px solid #dee2e6;
+    }
+    .input-studentid:focus, .input-cardid:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    .btn-save {
+      border-radius: 12px;
+      padding: 12px 30px;
+      font-size: 1.25rem;
+      font-weight: 500;
+      width: 100%;
+    }
+    .nav-pills .nav-link {
+      color: #555;
+      border-radius: 10px;
+      margin: 0 5px;
+      font-weight: 500;
+    }
+    .nav-pills .nav-link.active {
+      background-color: #0d6efd;
+      color: white;
+    }
+    .dashboard-card {
+      border-radius: 12px;
+      padding: 20px;
+      color: white;
+      height: 100%;
+    }
+    .bg-today { background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%); }
+    .bg-total { background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%); }
+    
+    .table-responsive { 
+      border-radius: 10px; 
+      overflow-x: auto; 
+      -webkit-overflow-scrolling: touch; 
+    }
+    .table thead th { background-color: #f8f9fa; border-bottom: 2px solid #e9ecef; }
+
+    .pagination .page-link {
+      color: #0d6efd;
+      box-shadow: none;
+    }
+    .pagination .page-item.active .page-link {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+      color: white;
+    }
+
+    .student-info-box {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: left;
+    }
+    
+    @media (max-width: 576px) {
+      .card-custom { padding: 1.25rem !important; }
+      .input-studentid, .input-cardid { font-size: 1.4rem; letter-spacing: 1px; }
+      .btn-save { font-size: 1.1rem; padding: 10px 20px; }
+      .dashboard-card { padding: 15px; }
+      .dashboard-card h5 { font-size: 1rem; }
+      .dashboard-card h2 { font-size: 1.6rem; }
+      .table th, .table td { font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="main-container">
+    <!-- Header / Nav Tabs -->
+    <ul class="nav nav-pills justify-content-center mb-4 flex-nowrap overflow-auto pb-2" id="pills-tab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active text-nowrap" id="pills-record-tab" data-bs-toggle="pill" data-bs-target="#pills-record" type="button" role="tab" aria-selected="true" onclick="setTimeout(()=>document.getElementById('studentId').focus(), 100)">
+          <i class="fa-solid fa-pen-to-square me-2"></i>บันทึกการเข้าใช้
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link text-nowrap" id="pills-data-tab" data-bs-toggle="pill" data-bs-target="#pills-data" type="button" role="tab" aria-selected="false" onclick="loadData()">
+          <i class="fa-solid fa-chart-line me-2"></i>ข้อมูล / แดชบอร์ด
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link text-nowrap" id="pills-register-tab" data-bs-toggle="pill" data-bs-target="#pills-register" type="button" role="tab" aria-selected="false" onclick="setTimeout(()=>document.getElementById('searchRegId').focus(), 100)">
+          <i class="fa-solid fa-id-card-clip me-2"></i>ลงทะเบียนบัตร
+        </button>
+      </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="pills-tabContent">
+      
+      <!-- ================= Tab 1: Record ================= -->
+      <div class="tab-pane fade show active" id="pills-record" role="tabpanel" tabindex="0">
+        <div class="card card-custom p-4 p-md-5 text-center">
+          <div>
+            <img src="https://lh5.googleusercontent.com/d/1nOAdGwqT4wEOY8CTfnmqhO38-A05Jh7A" alt="Logo" class="logo-img">
+          </div>
+          <h2 class="mb-4 fw-bold text-primary">บันทึกเข้าห้องสมุด</h2>
+          <p class="text-muted mb-4">กรอกรหัสประจำตัวนักเรียนหรือสแกนบัตร</p>
+          
+          <div class="row justify-content-center">
+            <div class="col-12 col-md-8">
+              <input type="text" id="studentId" class="form-control input-studentid mb-4" 
+                     placeholder="กรอกรหัส / สแกนบัตร" 
+                     onkeypress="handleEnter(event)" autocomplete="off">
+              
+              <button class="btn btn-primary btn-save" onclick="saveRecord()">
+                <i class="fa-solid fa-floppy-disk me-2"></i>บันทึกข้อมูล
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= Tab 2: Dashboard & Data ================= -->
+      <div class="tab-pane fade" id="pills-data" role="tabpanel" tabindex="0">
+        <div class="row mb-4 g-3">
+          <div class="col-6">
+            <div class="dashboard-card bg-today text-center shadow-sm">
+              <h5 class="mb-1"><i class="fa-regular fa-calendar-check me-2"></i>วันนี้</h5>
+              <h2 class="fw-bold mb-0" id="countToday">0</h2>
+              <small>คน</small>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="dashboard-card bg-total text-center shadow-sm">
+              <h5 class="mb-1"><i class="fa-solid fa-users me-2"></i>ทั้งหมด</h5>
+              <h2 class="fw-bold mb-0" id="countTotal">0</h2>
+              <small>คน</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-custom p-4">
+          <div class="row mb-3 g-3 align-items-center">
+            <div class="col-12 col-md-4">
+              <div class="d-flex align-items-center">
+                <label class="me-2 text-nowrap">แสดง</label>
+                <select id="rowsPerPage" class="form-select w-auto" onchange="changeRowsPerPage()">
+                  <option value="10" selected>10</option>
+                  <option value="20">20</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                  <option value="all">ทั้งหมด</option>
+                </select>
+                <label class="ms-2 text-nowrap">แถว</label>
+              </div>
+            </div>
+            
+            <div class="col-12 col-md-4">
+              <div class="input-group">
+                <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" id="searchInput" class="form-control" placeholder="ค้นหาข้อมูล..." onkeyup="filterData()">
+              </div>
+            </div>
+            
+            <div class="col-12 col-md-4 text-md-end text-center mt-3 mt-md-0">
+              <button class="btn btn-success me-2" onclick="exportExcel()">
+                <i class="fa-solid fa-file-excel me-1"></i> Excel
+              </button>
+              <button class="btn btn-secondary" onclick="loadData()">
+                <i class="fa-solid fa-arrows-rotate me-1"></i> รีเฟรช
+              </button>
+            </div>
+          </div>
+
+          <div class="table-responsive border">
+            <table class="table table-hover align-middle text-nowrap mb-0" id="dataTable">
+              <thead>
+                <tr>
+                  <th class="text-center" width="10%">ลำดับ</th>
+                  <th width="20%">วันที่</th>
+                  <th class="text-center" width="15%">รหัสประจำตัว</th>
+                  <th width="35%">ชื่อ สกุล</th>
+                  <th class="text-center" width="20%">ชั้น</th>
+                  <th style="display: none;">ข้อมูล D</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <tr>
+                  <td colspan="5" class="text-center text-muted py-4">กรุณากดปุ่มรีเฟรชเพื่อโหลดข้อมูล</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap">
+            <div id="pageInfo" class="text-muted mb-2 mb-md-0 text-sm">แสดง 0 ถึง 0 จาก 0 รายการ</div>
+            <nav aria-label="Page navigation">
+              <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= Tab 3: Register Card ================= -->
+      <div class="tab-pane fade" id="pills-register" role="tabpanel" tabindex="0">
+        <div class="card card-custom p-4 p-md-5 text-center">
+          <h2 class="mb-4 fw-bold text-primary">ลงทะเบียนบัตรนักเรียน</h2>
+          <p class="text-muted mb-4">ค้นหาข้อมูลนักเรียนและแตะบัตรเพื่อลงทะเบียนเข้าสู่ระบบ</p>
+          
+          <div class="row justify-content-center">
+            <div class="col-12 col-md-8">
+              
+              <div class="input-group mb-4">
+                <input type="text" id="searchRegId" class="form-control form-control-lg" 
+                       placeholder="กรอกเลขประจำตัวนักเรียน" 
+                       onkeypress="if(event.key === 'Enter') searchStudentToRegister()" autocomplete="off">
+                <button class="btn btn-primary px-4" onclick="searchStudentToRegister()">
+                  <i class="fa-solid fa-magnifying-glass me-2"></i>ค้นหา
+                </button>
+              </div>
+
+              <div id="studentInfoBox" class="student-info-box mb-4 d-none">
+                <h5 class="border-bottom pb-2 mb-3 text-primary"><i class="fa-solid fa-user-check me-2"></i>ข้อมูลนักเรียน</h5>
+                <div class="row mb-2">
+                  <div class="col-4 fw-bold text-end">เลขประจำตัว :</div>
+                  <div class="col-8" id="infoId">-</div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4 fw-bold text-end">ชื่อ สกุล :</div>
+                  <div class="col-8" id="infoName">-</div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4 fw-bold text-end">ชั้น/ห้อง :</div>
+                  <div class="col-8" id="infoRoom">-</div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4 fw-bold text-end">รหัสบัตรเดิม :</div>
+                  <div class="col-8 text-muted" id="infoCard">-</div>
+                </div>
+              </div>
+
+              <div id="cardTapSection" class="d-none">
+                <hr>
+                <h5 class="mb-3 mt-3 text-success"><i class="fa-solid fa-wifi me-2"></i>แตะบัตรนักเรียน</h5>
+                <input type="text" id="newCardUid" class="form-control input-cardid mb-3" 
+                       placeholder="รอรับสัญญาณบัตร..." 
+                       onkeypress="if(event.key === 'Enter') saveNewCard()" autocomplete="off">
+                <button class="btn btn-success btn-save" onclick="saveNewCard()">
+                  <i class="fa-solid fa-save me-2"></i>บันทึกบัตร
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+  <script>
+    // =========================================================================
+    // ⭐️ นำ URL ของ Web App ที่ได้จาก Google Apps Script มาใส่ที่ตัวแปรนี้ ⭐️
+    // =========================================================================
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby9ebVmKc3tz_F224h46WLsGtuHXx9y7-u6jP3m2P2C9RiXVZQhIEGU3iIzdC92_hDx/exec"; 
+
+    // ฟังก์ชันสำหรับเรียก API ไปยัง Google Apps Script
+    async function callAPI(action, payload = {}) {
+      payload.action = action; // แนบคำสั่งไปด้วย
+      try {
+        const response = await fetch(WEB_APP_URL, {
+          method: "POST",
+          // ใช้ text/plain เพื่อเลี่ยงปัญหา CORS Preflight ตอนเรียกจาก GitHub Pages
+          headers: { "Content-Type": "text/plain;charset=utf-8" }, 
+          body: JSON.stringify(payload)
+        });
+        return await response.json();
+      } catch (error) {
+        console.error("API Error:", error);
+        throw error;
+      }
+    }
+
+    // ----------------------------------------------------
+    // ตัวแปรและระบบของ Tab 1 & Tab 2
+    // ----------------------------------------------------
+    let globalData = []; 
+    let filteredData = []; 
+    let currentPage = 1; 
+    let rowsPerPage = 10; 
+
+    window.onload = function() {
+      document.getElementById('studentId').focus();
+    };
+
+    function handleEnter(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        saveRecord();
+      }
+    }
+
+    async function saveRecord() {
+      const inputEl = document.getElementById('studentId');
+      const studentId = inputEl.value.trim();
+
+      if (studentId === "") {
+        Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบถ้วน', text: 'กรุณากรอกข้อมูลเพื่อบันทึก', confirmButtonColor: '#0d6efd' });
+        inputEl.focus();
+        return;
+      }
+
+      Swal.fire({ title: 'กำลังตรวจสอบข้อมูล...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+      
+      try {
+        const response = await callAPI('saveData', { inputValue: studentId });
+        
+        if (response.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'บันทึกสำเร็จ',
+            html: `<b>รหัสประจำตัว:</b> ${response.colB}<br>
+                   <b>ชื่อ สกุล:</b> ${response.colC}<br>
+                   <b>ชั้น:</b> ${response.colD}`,
+            showConfirmButton: false,
+            timer: 1000, 
+            timerProgressBar: true
+          }).then(() => {
+            inputEl.value = ''; 
+            inputEl.focus();    
+          });
+        } else {
+          Swal.fire({ icon: 'error', title: 'ข้อผิดพลาด', text: response.message, showConfirmButton: false, timer: 1500, timerProgressBar: true }).then(() => {
+            inputEl.value = ''; 
+            inputEl.focus();
+          });
+        }
+      } catch (error) {
+        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้', 'error');
+      }
+    }
+
+    function parseDateStr(dateStr) {
+      if (!dateStr || dateStr === '-') return 0;
+      const parts = dateStr.split(/[\s/:]+/);
+      if (parts.length >= 3) {
+        const d = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const y = parseInt(parts[2], 10);
+        const h = parts[3] ? parseInt(parts[3], 10) : 0;
+        const min = parts[4] ? parseInt(parts[4], 10) : 0;
+        const sec = parts[5] ? parseInt(parts[5], 10) : 0;
+        return new Date(y, m, d, h, min, sec).getTime();
+      }
+      return 0;
+    }
+
+    async function loadData() {
+      document.getElementById('tableBody').innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">กำลังโหลดข้อมูล <i class="fa-solid fa-spinner fa-spin"></i></td></tr>';
+      
+      try {
+        const response = await callAPI('getData');
+        if (response.success) {
+          globalData = response.data;
+          globalData.sort((a, b) => parseDateStr(b.timestamp) - parseDateStr(a.timestamp));
+          filteredData = [...globalData]; 
+          currentPage = 1; 
+          updateDashboard();
+          renderTableCurrentPage();
+        } else {
+          Swal.fire('ข้อผิดพลาด', response.message, 'error');
+        }
+      } catch (error) {
+         Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบดึงข้อมูลได้', 'error');
+         document.getElementById('tableBody').innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+      }
+    }
+
+    function filterData() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      filteredData = globalData.filter(item => 
+        (item.timestamp && item.timestamp.toLowerCase().includes(query)) ||
+        (item.colA && item.colA.toString().toLowerCase().includes(query)) || 
+        (item.colB && item.colB.toString().toLowerCase().includes(query)) ||
+        (item.colC && item.colC.toString().toLowerCase().includes(query)) ||
+        (item.colD && item.colD.toString().toLowerCase().includes(query))
+      );
+      currentPage = 1; 
+      renderTableCurrentPage();
+    }
+
+    function changeRowsPerPage() {
+      const select = document.getElementById('rowsPerPage');
+      const val = select.value;
+      if (val === 'all') { rowsPerPage = 'all'; } else { rowsPerPage = parseInt(val, 10); }
+      currentPage = 1; 
+      renderTableCurrentPage();
+    }
+
+    function renderTableCurrentPage() {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+
+      if (filteredData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">ไม่พบข้อมูล หรือยังไม่มีชีต "ข้อมูลรอง"</td></tr>';
+        document.getElementById('pageInfo').innerText = 'แสดง 0 ถึง 0 จาก 0 รายการ';
+        document.getElementById('pagination').innerHTML = '';
+        return;
+      }
+
+      let dataToShow = [];
+      let startIndex = 0;
+      let endIndex = filteredData.length;
+
+      if (rowsPerPage !== 'all') {
+        startIndex = (currentPage - 1) * rowsPerPage;
+        endIndex = Math.min(startIndex + rowsPerPage, filteredData.length);
+        dataToShow = filteredData.slice(startIndex, endIndex);
+      } else {
+        dataToShow = filteredData;
+      }
+
+      dataToShow.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        const displayIndex = startIndex + index + 1;
+        const dateText = item.timestamp ? item.timestamp : '-';
+        const colA_text = item.colA ? item.colA : '-';
+        const colB_text = item.colB ? item.colB : '-';
+        const colC_text = item.colC ? `<span class="badge bg-secondary">${item.colC}</span>` : '-';
+        const colD_text = item.colD ? item.colD : '-';
+
+        tr.innerHTML = `
+          <td class="text-center">${displayIndex}</td>
+          <td>${dateText}</td>
+          <td class="text-center fw-bold text-primary">${colA_text}</td>
+          <td>${colB_text}</td>
+          <td class="text-center">${colC_text}</td>
+          <td style="display: none;">${colD_text}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('pageInfo').innerText = `แสดง ${startIndex + 1} ถึง ${endIndex} จากทั้งหมด ${filteredData.length} รายการ`;
+      setupPagination();
+    }
+
+    function setupPagination() {
+      const paginationUl = document.getElementById('pagination');
+      paginationUl.innerHTML = '';
+      if (rowsPerPage === 'all' || filteredData.length <= rowsPerPage) { return; }
+
+      const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+      const prevLi = document.createElement('li');
+      prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+      prevLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="goToPage(${currentPage - 1})">ก่อนหน้า</a>`;
+      paginationUl.appendChild(prevLi);
+
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, currentPage + 2);
+      
+      if (startPage > 1) {
+        paginationUl.innerHTML += `<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="goToPage(1)">1</a></li>`;
+        if (startPage > 2) {
+          paginationUl.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="goToPage(${i})">${i}</a>`;
+        paginationUl.appendChild(li);
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          paginationUl.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+        paginationUl.innerHTML += `<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="goToPage(${totalPages})">${totalPages}</a></li>`;
+      }
+
+      const nextLi = document.createElement('li');
+      nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+      nextLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="goToPage(${currentPage + 1})">ถัดไป</a>`;
+      paginationUl.appendChild(nextLi);
+    }
+
+    function goToPage(page) {
+      const totalPages = Math.ceil(filteredData.length / (rowsPerPage === 'all' ? filteredData.length : rowsPerPage));
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      renderTableCurrentPage();
+    }
+
+    function updateDashboard() {
+      const d = new Date();
+      const todayStr = ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear();
+      let countToday = 0;
+      globalData.forEach(item => {
+        if(item.timestamp) {
+          const itemDate = item.timestamp.substring(0, 10);
+          if (itemDate === todayStr) { countToday++; }
+        }
+      });
+      animateValue("countToday", countToday);
+      animateValue("countTotal", globalData.length);
+    }
+
+    function animateValue(id, end) {
+      const obj = document.getElementById(id);
+      let current = parseInt(obj.innerText) || 0;
+      if (current === end) return;
+      const step = end > current ? 1 : -1;
+      const timer = setInterval(() => {
+        current += step;
+        obj.innerText = current;
+        if (current === end) clearInterval(timer);
+      }, 20);
+    }
+
+    function exportExcel() {
+      if(filteredData.length === 0) {
+        Swal.fire('แจ้งเตือน', 'ไม่มีข้อมูลให้ส่งออก', 'info');
+        return;
+      }
+      const exportData = filteredData.map((item, index) => ({
+        "ลำดับ": index + 1,
+        "วันที่": item.timestamp || '-',
+        "รหัสประจำตัว": item.colA || '-',
+        "ชื่อ สกุล": item.colB || '-',
+        "ชั้น": item.colC || '-'
+      }));
+      let ws = XLSX.utils.json_to_sheet(exportData);
+      ws['!cols'] = [ { wch: 10 }, { wch: 20 }, { wch: 20 }, { wch: 35 }, { wch: 15 } ];
+      let wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "ข้อมูลเข้าใช้");
+      XLSX.writeFile(wb, "elibrary-dashboard-data.xlsx");
+    }
+
+    // ----------------------------------------------------
+    // ระบบของ Tab 3 : ลงทะเบียนบัตร
+    // ----------------------------------------------------
+    let currentRegRowIndex = null; 
+
+    async function searchStudentToRegister() {
+      const stuId = document.getElementById('searchRegId').value.trim();
+      
+      if (stuId === "") {
+        Swal.fire('แจ้งเตือน', 'กรุณากรอกเลขประจำตัวนักเรียน', 'warning');
+        return;
+      }
+
+      document.getElementById('studentInfoBox').classList.add('d-none');
+      document.getElementById('cardTapSection').classList.add('d-none');
+      currentRegRowIndex = null;
+
+      Swal.fire({ title: 'กำลังค้นหาข้อมูล...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+      try {
+        const res = await callAPI('searchStudent', { studentId: stuId });
+        
+        if (res.success) {
+          Swal.close();
+          currentRegRowIndex = res.rowIndex;
+          
+          document.getElementById('infoId').innerText = res.id;
+          document.getElementById('infoName').innerText = res.name;
+          document.getElementById('infoRoom').innerText = res.room;
+          document.getElementById('infoCard').innerText = res.card ? res.card : "ยังไม่มีข้อมูลบัตร";
+          
+          document.getElementById('studentInfoBox').classList.remove('d-none');
+          document.getElementById('cardTapSection').classList.remove('d-none');
+          
+          setTimeout(() => {
+            document.getElementById('newCardUid').value = '';
+            document.getElementById('newCardUid').focus();
+          }, 300);
+
+        } else {
+          Swal.fire('ไม่พบข้อมูล', res.message, 'error');
+          document.getElementById('searchRegId').focus();
+        }
+      } catch (error) {
+        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้', 'error');
+      }
+    }
+
+    async function saveNewCard() {
+      const cardUid = document.getElementById('newCardUid').value.trim();
+      
+      if (!currentRegRowIndex) {
+        Swal.fire('แจ้งเตือน', 'กรุณาค้นหาข้อมูลนักเรียนก่อน', 'warning');
+        return;
+      }
+
+      if (cardUid === "") {
+        Swal.fire('แจ้งเตือน', 'กรุณาแตะบัตร หรือกรอกรหัสบัตร', 'warning');
+        return;
+      }
+
+      Swal.fire({ title: 'กำลังบันทึกบัตร...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+      try {
+        const res = await callAPI('registerCard', { rowIndex: currentRegRowIndex, cardUid: cardUid });
+        
+        if (res.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'ลงทะเบียนบัตรสำเร็จ',
+            showConfirmButton: false,
+            timer: 1500
+          }).then(() => {
+            document.getElementById('searchRegId').value = '';
+            document.getElementById('studentInfoBox').classList.add('d-none');
+            document.getElementById('cardTapSection').classList.add('d-none');
+            currentRegRowIndex = null;
+            document.getElementById('searchRegId').focus();
+          });
+        } else {
+          Swal.fire('ข้อผิดพลาด', res.message, 'error');
+        }
+      } catch (error) {
+        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

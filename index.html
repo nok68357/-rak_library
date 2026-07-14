@@ -314,12 +314,12 @@
     // =========================================================================
     // ⭐️ นำ URL ของ Web App ที่ได้จาก Google Apps Script มาใส่ที่ตัวแปรนี้ ⭐️
     // =========================================================================
-    const WEB_APP_URL = "ใส่_URL_WEB_APP_ที่ได้จากการ_Deploy_ที่นี่"; 
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby9ebVmKc3tz_F224h46WLsGtuHXx9y7-u6jP3m2P2C9RiXVZQhIEGU3iIzdC92_hDx/exec"; 
 
     // ฟังก์ชันสำหรับเรียก API ไปยัง Google Apps Script (ปรับปรุงใหม่เพื่อช่วยหาข้อผิดพลาด)
     async function callAPI(action, payload = {}) {
       // ตรวจสอบเบื้องต้นว่าใส่ URL หรือยัง
-      if (WEB_APP_URL === "https://script.google.com/macros/s/AKfycby9ebVmKc3tz_F224h46WLsGtuHXx9y7-u6jP3m2P2C9RiXVZQhIEGU3iIzdC92_hDx/exec" || WEB_APP_URL.trim() === "") {
+      if (WEB_APP_URL === "ใส่_URL_WEB_APP_ที่ได้จากการ_Deploy_ที่นี่" || WEB_APP_URL.trim() === "") {
         throw new Error("MISSING_URL");
       }
 

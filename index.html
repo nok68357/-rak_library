@@ -314,10 +314,15 @@
     // =========================================================================
     // ⭐️ นำ URL ของ Web App ที่ได้จาก Google Apps Script มาใส่ที่ตัวแปรนี้ ⭐️
     // =========================================================================
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby9ebVmKc3tz_F224h46WLsGtuHXx9y7-u6jP3m2P2C9RiXVZQhIEGU3iIzdC92_hDx/exec"; 
+    const WEB_APP_URL = "ใส่_URL_WEB_APP_ที่ได้จากการ_Deploy_ที่นี่"; 
 
-    // ฟังก์ชันสำหรับเรียก API ไปยัง Google Apps Script
+    // ฟังก์ชันสำหรับเรียก API ไปยัง Google Apps Script (ปรับปรุงใหม่เพื่อช่วยหาข้อผิดพลาด)
     async function callAPI(action, payload = {}) {
+      // ตรวจสอบเบื้องต้นว่าใส่ URL หรือยัง
+      if (WEB_APP_URL === "https://script.google.com/macros/s/AKfycby9ebVmKc3tz_F224h46WLsGtuHXx9y7-u6jP3m2P2C9RiXVZQhIEGU3iIzdC92_hDx/exec" || WEB_APP_URL.trim() === "") {
+        throw new Error("MISSING_URL");
+      }
+
       payload.action = action; // แนบคำสั่งไปด้วย
       try {
         const response = await fetch(WEB_APP_URL, {
@@ -326,10 +331,24 @@
           headers: { "Content-Type": "text/plain;charset=utf-8" }, 
           body: JSON.stringify(payload)
         });
-        return await response.json();
+
+        if (!response.ok) {
+           throw new Error(`HTTP Error: ${response.status}`);
+        }
+
+        const textResponse = await response.text();
+        
+        try {
+            // ลองแปลงเป็น JSON
+            return JSON.parse(textResponse);
+        } catch (e) {
+            console.error("การตอบกลับไม่ใช่ JSON. สิ่งที่ได้มาคือ:", textResponse);
+            throw new Error("INVALID_RESPONSE");
+        }
+
       } catch (error) {
-        console.error("API Error:", error);
-        throw error;
+        console.error("API Error details:", error);
+        throw error; // ส่ง error ออกไปให้ catch ด้านนอกจัดการ
       }
     }
 
@@ -388,7 +407,11 @@
           });
         }
       } catch (error) {
-        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้', 'error');
+        if (error.message === "MISSING_URL") {
+           Swal.fire('ข้อผิดพลาด', 'กรุณาใส่ Web App URL ในโค้ดบรรทัดที่ 340 ก่อนใช้งาน', 'error');
+        } else {
+           Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้ (ดูรายละเอียดใน Console กด F12)', 'error');
+        }
       }
     }
 
@@ -423,7 +446,11 @@
           Swal.fire('ข้อผิดพลาด', response.message, 'error');
         }
       } catch (error) {
-         Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบดึงข้อมูลได้', 'error');
+         if (error.message === "MISSING_URL") {
+           Swal.fire('ข้อผิดพลาด', 'กรุณาใส่ Web App URL ในโค้ดบรรทัดที่ 340 ก่อนใช้งาน', 'error');
+         } else {
+           Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบดึงข้อมูลได้ (ดูรายละเอียดใน Console กด F12)', 'error');
+         }
          document.getElementById('tableBody').innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
       }
     }
@@ -633,7 +660,11 @@
           document.getElementById('searchRegId').focus();
         }
       } catch (error) {
-        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้', 'error');
+        if (error.message === "MISSING_URL") {
+           Swal.fire('ข้อผิดพลาด', 'กรุณาใส่ Web App URL ในโค้ดบรรทัดที่ 340 ก่อนใช้งาน', 'error');
+        } else {
+           Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้ (ดูรายละเอียดใน Console กด F12)', 'error');
+        }
       }
     }
 
@@ -672,7 +703,11 @@
           Swal.fire('ข้อผิดพลาด', res.message, 'error');
         }
       } catch (error) {
-        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้', 'error');
+        if (error.message === "MISSING_URL") {
+           Swal.fire('ข้อผิดพลาด', 'กรุณาใส่ Web App URL ในโค้ดบรรทัดที่ 340 ก่อนใช้งาน', 'error');
+        } else {
+           Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้ (ดูรายละเอียดใน Console กด F12)', 'error');
+        }
       }
     }
   </script>
